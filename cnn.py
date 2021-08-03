@@ -116,15 +116,8 @@ def preprocess(white_sample_dir, black_sample_dir, data_out_path):
         path_list.append((dir, 0))
     for dir in black_sample_dir:
         path_list.append((dir, 1))
-    # if args.s != None:
-    #     api_dict = json.load(open("/home/ubuntu/data/sandbox/scripts/api_to_index.json", 'rb'))
-    # else:
-    #     api_dict = json.load(open("C:/Users/hhjimhhj/Desktop/实习/20000+/raw_count.json", 'rb')) | json.load(open("C:/Users/hhjimhhj/Desktop/实习/80+/raw_count.json", 'rb'))
-    index = 0
-    # for key in api_dict:
-    #     api_dict[key] = index
-    #     index += 1
     api_dict = {}
+    index = 0
     files = []
     for dir_label in path_list:
         files.extend([(dir_label[0] + '/' + dir, dir_label[1]) for dir in os.listdir(dir_label[0])])
@@ -186,8 +179,6 @@ class CustomDataset(Dataset):
 # [([Tensor([feature vector of a api]), ...], label), ...]
 # ####################
 def CustomCollate(sample_list):
-    # print(f'collate sample_list type {type(sample_list)}')
-    # print(f'collate sample_list type {type(sample_list[0])}')
     # 一些样本api调用次数比卷积核长度小，因此至少需要补至卷积核的长度
     max_len = max([len(sample[0]) for sample in sample_list] + [KERNAL_WIDTH])
     labels = []
@@ -196,8 +187,6 @@ def CustomCollate(sample_list):
     for sample in sample_list:
         padded_sample_list.append(torch.cat((torch.stack(sample[0]), torch.zeros([max_len - len(sample[0]), len(sample[0][0])]))))
         labels.append(sample[1])
-    # print(f'collate labels shape {torch.LongTensor(labels).shape}')
-    # print(f'collate data shape {torch.stack(padded_sample_list).unsqueeze(1).shape}')
     return torch.stack(padded_sample_list).unsqueeze(1), torch.LongTensor(labels)
 
 class NeuralNetwork(nn.Module):
@@ -232,10 +221,6 @@ def train_loop(dataloader, model, loss_fn, optimizer, run_on_cuda:bool):
 
         pred = model(X)
 
-        # print(f'train data shape {X.shape}')
-        # print(f'train data shape {y.shape}')
-        # print(f'train data shape {pred.shape}')
-
         loss = loss_fn(pred, y)
 
         # Backpropagation
@@ -267,21 +252,9 @@ def test_loop(dataloader, model, loss_fn, threshold, run_on_cuda:bool):
             pred = nn.functional.softmax(pred, dim=1)
             pred = nn.functional.threshold(pred, threshold, 0)
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
-            # if run_on_cuda:
-            #     pred = pred.cpu()
-            #     y = y.cpu()
             y_pred = pred.argmax(1)
             for i in range(len(y)):
                 c_m[y[i], y_pred[i]] += 1
-
-        # model = model.cpu()
-        # for X, y in dataloader:
-        #     #run on cpu
-        #     pred = model(X)
-        #     print(f'test label shape {y.shape}')
-        #     print(f'test pred shape {pred.argmax(1).shape}')  
-        #     c_m_list_1.append(confusion_matrix(y, pred.argmax(1)))#混淆矩阵加起来和总数不一样什么鬼
-        # model = model.cuda()
 
     test_loss /= num_batches
     correct /= size
