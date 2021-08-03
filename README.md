@@ -4,7 +4,6 @@ README.md
 api_count_preprocess.py #全连接神经网络(DNN)数据预处理
 api_count_train.py      #全连接神经网络训练
 cnn.py                  #cnn数据预处理+训练
-cp.py                   #提取爬取的exe文件
 crawler.py              #GitHub爬虫
 crawler_multiprocess.py #GitHub爬虫(多线程)
 ```
