@@ -2,8 +2,9 @@
 # GitHub爬虫（多线程）
 # 
 # 命令行：
-# nohup python -u crawler_multiprocess.py [-s]
-# -s：服务器上的python版本为3.8.8，和本地不同，在服务器上运行添加此选项
+# nohup python -u crawler_multiprocess.py [--server | --local]
+# --server：在python 3.9以下版本(服务器)运行添加此选项
+# --local：在python 3.9及以上版本(本地)运行添加此选项
 # 
 # 同一目录下文件：
 # config.json：记录目前爬虫进度。爬取到第几个用户、用户id。
@@ -24,9 +25,12 @@ from multiprocessing import Process, Queue, Value
 import os
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-s', nargs='*', help="服务器上的python版本为3.8.8，在服务器上运行添加此选项")
+parser.add_argument('--server', dest='run_on_server', action='store_true')
+parser.add_argument('--local', dest='run_on_server', action='store_false')
+parser.set_defaults(run_on_server=True)
 args = parser.parse_args()
-if args.s != None:#python3.9版本以下
+
+if args.run_on_server:#python3.9版本以下
     path = "/home/ubuntu/git_crawler/"
     root_logger= logging.getLogger()
     root_logger.setLevel(logging.INFO)
